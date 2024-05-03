@@ -2,7 +2,7 @@ import streamlit as st
 import os
 from dotenv import load_dotenv
 import google.generativeai as genai
-import sys
+
 # Load environment variables
 load_dotenv()
 
@@ -20,19 +20,27 @@ def get_gemini_response(question):
 # Initialize Streamlit app
 st.set_page_config(page_title="Workout Plan")
 st.title("Workout Plan")
-    
-# Input for meal type
+
+# Input for fitness goal
 goal_type = st.selectbox("Select your fitness goal:", ["Weight loss", "Muscle gain", "Endurance improvement", "Overall health and wellness"])
 
-# Button to generate recipe
+# Input for age
+age = st.number_input("Enter your age:", min_value=10, max_value=100, step=1)
+
+# Button to generate workout plan
 submit_button = st.button("Generate Workout Plan")
 
-# Check if input_text is not empty and button is clicked
-if goal_type and submit_button:
+# Check if input is not empty and button is clicked
+if goal_type and age and submit_button:
     st.subheader("Here's the Workout Plan:")
     # Create prompt based on user inputs
-    prompt = f"Generate a workout plan for {goal_type.lower()} "
+    prompt = f"Generate a workout plan for {goal_type.lower()} individuals aged {age} "
     response = get_gemini_response(prompt)
-    for chunk in response:
-        st.write(chunk.text)
-        
+    if response:
+        for chunk in response:
+            if hasattr(chunk, "text"):
+                st.write(chunk.text)
+            else:
+                st.warning("Unable to generate workout plan. Please try again later.")
+    else:
+        st.warning("Unable to generate workout plan. Please try again later.")
